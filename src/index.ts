@@ -9,7 +9,7 @@ interface Project{
     title: string;
     description: string;
     priority: number;
-    status: string[]; 
+    status: string; 
 }
 
 // Banco de dados em memória
@@ -25,7 +25,7 @@ interface createProjectBody{
     title: string;
     description: string;
     priority: number;
-    status: string[]; 
+    status: string; 
 };
 
 // Criação de uma instância do Fastify.
@@ -50,6 +50,8 @@ server.get('/projects', async (request: FastifyRequest, reply: FastifyReply) => 
 server.post<{ Body: createProjectBody }>(
     '/projects',
      async (request: FastifyRequest<{ Body: createProjectBody }>, reply: FastifyReply) =>{
+        const projectStatus = ['Planejado', 'Em andamento', 'Concluído', 'Cancelado'];
+
         const {  title, description, priority, status} = request.body;
 
         // Validação de preenchimento de campos obrigatórios
@@ -63,6 +65,11 @@ server.post<{ Body: createProjectBody }>(
             reply.code(400).send({ message: 'A prioridade deve ser registrada como número de 1 (mais alta) a 3 (mais baixa)' });
             return;
         }
+
+        if (!projectStatus.includes(status)) {
+            reply.code(400).send({ message: `O status deve ser um dos seguintes: ${projectStatus.join(', ')}` });
+            return;
+        }
     
         const newProject = {
             id : randomUUID(),    // Gerar um ID único para o projeto
@@ -72,6 +79,11 @@ server.post<{ Body: createProjectBody }>(
             priority,
             status,  // Falta criar elementos da array
         }});
+
+        projects.push(newProject); 
+        
+        reply.code(201); 
+        return newProject;
     
 // Obter detalhes de um projeto específico
 // Endpoint: GET /projects/:projectId
@@ -136,4 +148,13 @@ server.delete<{ Params: ProjectParams }>(
 );
 
 // Iniciar o servidor
+const start = async () => {
+    try {
+        await server.listen({ port: 3000, host: '0.0.0.0' });
+        server.log.info(`Sever listening on ${JSON.stringify(server.server.address())}`);
+    } catch (err) {
+        server.log.error(err);
+        process.exit(1); 
+    }
+    };
 start();
