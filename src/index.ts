@@ -37,7 +37,63 @@ const server: FastifyInstance = Fastify({
 });
 
 // Criação da rota Health Check - verificar se o servidor está funcionando.
-server.get('/health', async (request: FastifyRequest, reply: FastifyRReply) => {
+server.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
     return { message: "It's working!"};
 });
 
+// Listar todos os projetos (com filtro de paginação) ======= Falta configurar a paginação
+// Endpoint: GET /projects
+server.get('/projects', async (request: FastifyRequest, reply: FastifyReply) => {
+    return projects;
+})
+
+// Criar um novo projeto
+// Endpoint: POST /projects
+server.post<{ Body: createProjectBody }>(
+    '/projects',
+     async (request: FastifyRequest<{ Body: createProjectBody }>, reply: FastifyReply) =>{
+        const {  title, description, priority, status} = request.body;
+
+        // Validação de preenchimento de campos obrigatórios
+        if (!title || !priority || !status){
+            reply.code(400).send({ message: 'Os campos Título, Prioridade e Status são obrigatórios.'});
+            return;
+        }
+
+        // Criar Validação do prioridade - número inteiro
+        if (typeof priority !== 'number'){
+            reply.code(400).send({ message: 'A prioridade deve ser registrada como número de 1 (mais alta) a 3 (mais baixa)' });
+            return;
+        }
+    
+        // Gerar um ID único para o projeto
+
+        // Registrar data e hora de criação do projeto
+    
+        const newProoject = {
+
+        }
+    )
+
+     
+
+// Obter detalhes de um projeto específico
+// Endpoint: GET /projects/:projectId
+server.get<{ Params: ProjectParams }>(
+    '/projects/:projectId',
+    async (request: FastifyRequest<{ Params: ProjectParams }>, reply: FastifyReply) =>{
+        const projectId = request.params.projectId;
+        const project = projects.find((p) => p.id === projectId);
+
+        if (!project){
+            reply.code(404).send({ message: 'Projeto não encontrado'});
+            return;
+        }
+
+        return project;
+    }
+);
+
+// atualizar um projeto existente
+
+// Deletar um projeto
