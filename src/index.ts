@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {randomUUID} from 'crypto';        // Gera identificadores únicos. É uma alternativa ao cuid    
 
-// Tipo Project
+// Tipo Project - Define a estrutura de dados de um projeto.
 // ID e data de criação serão criados automaticamente e não podem ser alterados 
 interface Project{
     id: string;
@@ -15,13 +15,12 @@ interface Project{
 // Banco de dados em memória
 let projects: Project[] = [];
 
-// Interface para parâmetros de rota (id do projeto)
+// Interface para parâmetros de rota (id do projeto). Ajuda o TypeScript os tipos de parâmetros da URL.
 interface ProjectParams {
     projectId: string;
 }
 
 // Interface para o corpo de requisição (POST e PUT)
-// Campos obrigatórios para POST (para criar)
 interface createProjectBody{
     title: string;
     description: string;
@@ -135,3 +134,6 @@ server.delete<{ Params: ProjectParams }>(
         reply.code(204).send();
     }
 );
+
+// Iniciar o servidor
+start();
