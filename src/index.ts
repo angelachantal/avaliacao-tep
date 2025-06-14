@@ -2,6 +2,7 @@ import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import {randomUUID} from 'crypto';        // Gera identificadores únicos. É uma alternativa ao cuid    
 
 // Tipo Project
+// ID e data de criação serão criados automaticamente e não podem ser alterados 
 interface Project{
     id: string;
     createdAt: Date;
@@ -21,8 +22,6 @@ interface ProjectParams {
 
 // Interface para o corpo de requisição (POST e PUT)
 // Campos obrigatórios para POST (para criar)
-// Partial<Project> para PUT (pra atualizar)
-// ID e data de criação não podem ser alterados 
 interface createProjectBody{
     title: string;
     description: string;
@@ -45,7 +44,7 @@ server.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
 // Endpoint: GET /projects
 server.get('/projects', async (request: FastifyRequest, reply: FastifyReply) => {
     return projects;
-})
+});
 
 // Criar um novo projeto
 // Endpoint: POST /projects
@@ -66,17 +65,15 @@ server.post<{ Body: createProjectBody }>(
             return;
         }
     
-        // Gerar um ID único para o projeto
-
-        // Registrar data e hora de criação do projeto
+        const newProject = {
+            id : randomUUID(),    // Gerar um ID único para o projeto
+            createdAt: new Date(),    // Registrar data e hora de criação do projeto
+            title,
+            description,
+            priority,
+            status,  // Falta criar elementos da array
+        }});
     
-        const newProoject = {
-
-        }
-    )
-
-     
-
 // Obter detalhes de um projeto específico
 // Endpoint: GET /projects/:projectId
 server.get<{ Params: ProjectParams }>(
@@ -94,6 +91,24 @@ server.get<{ Params: ProjectParams }>(
     }
 );
 
-// atualizar um projeto existente
+// Atualizar um projeto existente
+// Endpoint: PUT /projects/:projectId
+// Partial<Project> para PUT (pra indicar que nem todos os campos são obrigatórios na atualização)
+server.put<{ Body: Partial<createProjectBody>; Params: ProjectParams }>(
+    '/projects/:projectId',
+    async (request: FastifyRequest<{ Body: Partial<createProjectBody>; Params: ProjectParams}>, reply: FastifyReply) => {
+        const projectId = request.params.projectId;
+        const updates = request.body;
+
+        const projectIndex = projects.findIndex((p) => p.id === projectId);
+
+        if (projectIndex === -1) {
+            reply.code(404).send({ message: 'Projeto não encontrado' });
+            return;
+        }
+    })
+
+
 
 // Deletar um projeto
+// Endpoint: DELETE /projects/:projectId
