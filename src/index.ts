@@ -106,9 +106,32 @@ server.put<{ Body: Partial<createProjectBody>; Params: ProjectParams }>(
             reply.code(404).send({ message: 'Projeto não encontrado' });
             return;
         }
-    })
 
-
+        const originalProject = projects[projectIndex];
+        const updatedProject = {
+            ...originalProject, //Pega todos os campos do projeto original
+            ...updates, // Sobrescreve com os campos que foram fornecidos no corpo da requisição
+            id: originalProject.id, // Garante que o ID não seja alterado
+            createdAt: originalProject.createdAt, // Garante que a data de criação não seja alterada
+        };
+        projects[projectIndex] = updatedProject;
+        return updatedProject;
+    });
 
 // Deletar um projeto
 // Endpoint: DELETE /projects/:projectId
+server.delete<{ Params: ProjectParams }>(
+    '/projects/:projectId',
+    async (request: FastifyRequest<{ Params: ProjectParams }>, reply: FastifyReply) => {
+        const projectId = request.params.projectId;
+        const projectIndex = projects.findIndex((p) => p.id === projectId);
+
+        if (projectIndex === -1) {
+            reply.code(404).send({ message: 'Projeto não encontrado' });
+            return;
+        }
+
+        projects.splice(projectIndex, 1);
+        reply.code(204).send();
+    }
+);
