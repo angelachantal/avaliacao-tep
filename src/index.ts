@@ -77,14 +77,15 @@ server.post<{ Body: createProjectBody }>(
             title,
             description,
             priority,
-            status,  // Falta criar elementos da array
-        }});
+            status, 
+        };
 
         projects.push(newProject); 
         
         reply.code(201); 
         return newProject;
-    
+     }
+    );
 // Obter detalhes de um projeto específico
 // Endpoint: GET /projects/:projectId
 server.get<{ Params: ProjectParams }>(
